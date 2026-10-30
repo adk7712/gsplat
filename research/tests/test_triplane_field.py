@@ -292,3 +292,17 @@ def test_shared_planes_match_internal_planes():
 
 
 _AABB_FOR_RNG_TEST = torch.tensor([[-1.5] * 3, [1.5] * 3])
+
+
+def test_field_residual_stats_after_densification():
+    """Regression: the trainer's log line must work after N changes (densification)."""
+    import train
+
+    fld = TriplaneField(_AABB_FOR_RNG_TEST, TriplaneFieldConfig(channels=4, resolutions=(8,)))
+    splats = {"means": torch.rand(30, 3), "sh0": torch.rand(30, 1, 3) + 0.1}
+    d, rel = train.field_residual_stats(splats, fld)
+    assert d.item() == 0.0 and rel.item() == 0.0  # zero-init field
+    torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+    splats = {"means": torch.rand(45, 3), "sh0": torch.rand(45, 1, 3) + 0.1}  # N grew
+    d, rel = train.field_residual_stats(splats, fld)
+    assert d.item() > 0 and torch.isfinite(rel)

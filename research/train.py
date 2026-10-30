@@ -194,6 +194,17 @@ def effective_attributes(splats, fld, planes=None):
     }
 
 
+@torch.no_grad()
+def field_residual_stats(splats, fld):
+    """Mean |field sh0 residual| and its size relative to mean |stored sh0|.
+
+    Re-queries the field at the CURRENT means: `attrs` from the forward pass is stale
+    after the optimizer step and densification (different N), which crashed the first
+    Checkpoint B launch."""
+    d = fld(splats["means"])["sh0"].abs().mean()
+    return d, d / splats["sh0"].abs().mean().clamp_min(1e-12)
+
+
 def git_commit() -> str:
     try:
         return subprocess.check_output(
@@ -350,9 +361,7 @@ def main() -> None:
             if reg is not None:
                 # Size of the field's colour residual relative to the stored sh0: shows
                 # whether the field contributes at all (review note on the small mlp_lr).
-                with torch.no_grad():
-                    d_sh0 = (attrs["colors"][:, 0] - splats["sh0"][:, 0]).abs().mean()
-                    rel = d_sh0 / splats["sh0"].abs().mean().clamp_min(1e-12)
+                d_sh0, rel = field_residual_stats(splats, fld)
                 msg += (f" reg {reg.item():.2e} field|dsh0| {d_sh0.item():.2e}"
                         f" ({rel.item():.1%}) cnn {'on' if fld.cnn_active else 'off'}")
             print(msg, flush=True)
