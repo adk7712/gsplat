@@ -1,0 +1,167 @@
+{
+ "repo_url": "https://github.com/adk7712/gsplat.git",
+ "ref": "ff897337416f818c2dab7701cfc6edd334c34b85",
+ "iters": 30000,
+ "jobs": [
+  {
+   "variant": "triplane_cnn",
+   "scene": "chair",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "drums",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "ficus",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "hotdog",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "lego",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "materials",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "mic",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "ship",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "chair",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "drums",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "ficus",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "hotdog",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "lego",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "materials",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "mic",
+   "seed": 2
+  },
+  {
+   "variant": "triplane_cnn_off25k",
+   "scene": "ship",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "chair",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "drums",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "ficus",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "hotdog",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "lego",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "materials",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "mic",
+   "seed": 2
+  },
+  {
+   "variant": "triplane",
+   "scene": "ship",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "chair",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "drums",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "ficus",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "hotdog",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "lego",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "materials",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "mic",
+   "seed": 2
+  },
+  {
+   "variant": "vanilla",
+   "scene": "ship",
+   "seed": 2
+  }
+ ]
+}

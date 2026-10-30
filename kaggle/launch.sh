@@ -54,13 +54,15 @@ PY
 
 rm -rf kaggle/build
 mkdir -p kaggle/build
-python3 - "$CFG" "$KAGGLE_USERNAME" <<'PY'
+# DATASET_OWNER: account that owns nerf-synthetic / gsplat-wheels. Teammates launching
+# from their own accounts set DATASET_OWNER=adk7712 once those datasets are shared with them.
+python3 - "$CFG" "$KAGGLE_USERNAME" "${DATASET_OWNER:-$KAGGLE_USERNAME}" <<'PY'
 import json, sys
-cfg_path, user = sys.argv[1:3]
+cfg_path, user, owner = sys.argv[1:4]
 cfg = json.load(open(cfg_path))
 meta = json.load(open("kaggle/kernel-metadata.json"))
 meta["id"] = f"{user}/splat-runner"
-meta["dataset_sources"] = [f"{user}/{d.split('/', 1)[1]}" for d in meta["dataset_sources"]]
+meta["dataset_sources"] = [f"{owner}/{d.split('/', 1)[1]}" for d in meta["dataset_sources"]]
 json.dump(meta, open("kaggle/build/kernel-metadata.json", "w"), indent=2)
 src = open("kaggle/run.py").read()
 needle = "r'''__RUN_CONFIG__'''"
