@@ -130,12 +130,16 @@ At Checkpoint B the field nearly doubled training time (lego: 33 vs 18 min). Pro
 * The field's own training step (query, loss, backward, Adam) costs ~8 / 18 / 36 ms at
   50k / 150k / 313k Gaussians, which is the whole overhead. It is linear in N. The plane
   CNN adds ~2.5 ms; the 16 GB T4 is nowhere near its memory limit.
-* Collisions in the scatter-add are **not** the cause. Clustered and uniform means cost
-  the same, and an exactly-equivalent `F.embedding_bag` sampler (`--field_sampler
-  embedding`, sorted segment-sum backward) is only ~5% faster in isolation and identical
-  in end-to-end training time (4.53 vs 4.54 min for 7k iters). The default stays `grid_sample`.
+* Collisions in the scatter-add are **not** the cause: clustered and uniform means cost
+  the same, and an exactly-equivalent `F.embedding_bag` sampler (sorted segment-sum
+  backward) gave identical end-to-end training time (4.53 vs 4.54 min for 7k iters), so it
+  was removed again.
 * Where the time goes (grid_sample path, per step at 313k): grid_sample backward ~9 ms,
   strided elementwise copies from the [C, N] -> [N, C] layout changes ~10 ms, grid_sample
   forward ~3 ms, MLP GEMMs ~2.5 ms, plus many small kernels. Generic PyTorch kernels run
   far below the T4's memory bandwidth for this access pattern. The bandwidth floor for
   N=313k, 3 planes x 4 corners x C=32 fp32 is a few ms per step.
+* **Fix (option B)**: `TriplaneField.forward` keeps grid_sample's channels-first [C, N]
+  layout through fusion and the MLP (applied as `W @ h + b`), removing the strided copies.
+  The original computation is kept as `forward_reference`; a CPU test checks outputs and
+  all gradients match, and `bench_field.py` times both.

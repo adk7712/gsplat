@@ -2,9 +2,10 @@
 
 Written to explain the ~2x training slowdown seen at Checkpoint B (+34 ms/step at
 ~313k Gaussians, growing with N). Times one training step of the FIELD ONLY
-(effective planes -> query -> loss incl. TV -> backward -> Adam step), for both
-plane samplers, with/without the plane CNN, for several N and two spatial
-distributions of means. Also prints the top CUDA kernels for the slowest case.
+(effective planes -> query -> loss incl. TV -> backward -> Adam step) for the
+current implementation ("optimized", channels-first) and the original one
+("reference", TriplaneField.forward_reference), with/without the plane CNN, for
+several N and two spatial distributions of means. Also prints the top CUDA kernels.
 
   python research/bench_field.py --result_dir results/bench
 """
@@ -36,11 +37,11 @@ def make_means(n: int, kind: str, device) -> torch.Tensor:
     return pts.to(device)
 
 
-def bench(sampler: str, cnn: bool, means: torch.Tensor, steps: int, profile: bool = False):
+def bench(impl: str, cnn: bool, means: torch.Tensor, steps: int, profile: bool = False):
     dev = means.device
     fld = TriplaneField(
         torch.tensor([[-1.5] * 3, [1.5] * 3]),
-        TriplaneFieldConfig(plane_cnn=cnn, sampler=sampler),
+        TriplaneFieldConfig(plane_cnn=cnn),
     ).to(dev)
     torch.nn.init.normal_(fld.mlp[-1].weight, std=0.01)  # as after a few steps
     opt, sched = make_field_optimizer(fld, 1.6e-3, 1.6e-4, 1.6e-4, 30_000)
@@ -48,7 +49,8 @@ def bench(sampler: str, cnn: bool, means: torch.Tensor, steps: int, profile: boo
 
     def step():
         planes = fld.effective_planes()
-        out = fld(means, planes)["sh0"]
+        fwd = fld.forward if impl == "optimized" else fld.forward_reference
+        out = fwd(means, planes)["sh0"]
         loss = (out - target).abs().mean() + fld.regularization(1e-4, 0.0, planes)
         loss.backward()
         opt.step()
@@ -90,13 +92,13 @@ def main():
         for n in args.n:
             means = make_means(n, kind, dev)
             for cnn in (False, True):
-                for sampler in ("grid_sample", "embedding"):
-                    ms, _ = bench(sampler, cnn, means, args.steps)
-                    rows.append(dict(dist=kind, n=n, cnn=cnn, sampler=sampler, ms_per_step=ms))
-                    print(f"{kind:9s} N={n:7d} cnn={int(cnn)} {sampler:11s} {ms:7.2f} ms/step", flush=True)
-    for sampler in ("grid_sample", "embedding"):
-        _, table = bench(sampler, False, make_means(max(args.n), "clustered", dev), 5, profile=True)
-        print(f"\nTop CUDA kernels, {sampler}, clustered N={max(args.n)}:\n{table}", flush=True)
+                for impl in ("reference", "optimized"):
+                    ms, _ = bench(impl, cnn, means, args.steps)
+                    rows.append(dict(dist=kind, n=n, cnn=cnn, impl=impl, ms_per_step=ms))
+                    print(f"{kind:9s} N={n:7d} cnn={int(cnn)} {impl:10s} {ms:7.2f} ms/step", flush=True)
+    for impl in ("reference", "optimized"):
+        _, table = bench(impl, False, make_means(max(args.n), "clustered", dev), 5, profile=True)
+        print(f"\nTop CUDA kernels, {impl}, clustered N={max(args.n)}:\n{table}", flush=True)
     os.makedirs(args.result_dir, exist_ok=True)
     with open(os.path.join(args.result_dir, "bench_field.json"), "w") as f:
         json.dump({"gpu": torch.cuda.get_device_name(dev), "torch": torch.__version__, "rows": rows}, f, indent=1)

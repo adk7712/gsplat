@@ -203,7 +203,7 @@ def test_cnn_off_after():
     assert len(eff) == len(fld.planes)
     for e, p in zip(eff, fld.planes):
         assert e is p
-    assert torch.equal(fld(means)["sh0"], raw_out)
+    assert torch.allclose(fld(means)["sh0"], raw_out, atol=1e-6)
 
     fld.zero_grad()
     fld(means)["sh0"].sum().backward()
@@ -308,31 +308,38 @@ def test_field_residual_stats_after_densification():
     assert d.item() > 0 and torch.isfinite(rel)
 
 
-# --- Added with the embedding_bag sampler (overhead investigation) -------------------
+# --- Added with the channels-first layout optimisation ----------------------------
 @pytest.mark.parametrize("res", [(8,), (4, 8, 16)])
 @pytest.mark.parametrize("fusion", ["product", "concat"])
-def test_embedding_sampler_matches_grid_sample(res, fusion):
-    """Same features and same gradients (planes, CNN, MLP, means) for both samplers."""
-    outs, grads = {}, {}
-    for sampler in ("grid_sample", "embedding"):
-        torch.manual_seed(0)
-        fld = TriplaneField(
-            _AABB_FOR_RNG_TEST,
-            TriplaneFieldConfig(channels=4, resolutions=res, fusion=fusion, plane_cnn=True,
-                                grad_to_means=True, sampler=sampler),
-        )
-        for c in fld.cnns:
-            torch.nn.init.normal_(c.conv2.weight, std=0.1)
-        torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
-        torch.manual_seed(1)
-        # inside the box, plus points outside (border clamp) and exactly on the faces
-        means = torch.cat([torch.rand(200, 3) * 3 - 1.5, torch.randn(20, 3) * 3,
-                           torch.tensor([[1.5, -1.5, 0.3], [-1.5, 1.5, 1.5]])]).requires_grad_()
-        out = fld(means)["sh0"]
-        (out * torch.randn_like(out, generator=torch.Generator().manual_seed(2))).sum().backward()
-        outs[sampler] = out.detach()
-        grads[sampler] = {n: p.grad.clone() for n, p in fld.named_parameters()}
-        grads[sampler]["means"] = means.grad[:200].clone()  # interior points only
-    assert torch.allclose(outs["grid_sample"], outs["embedding"], atol=1e-6)
-    for n in grads["grid_sample"]:
-        assert torch.allclose(grads["grid_sample"][n], grads["embedding"][n], atol=1e-5), n
+@pytest.mark.parametrize("opacity", [False, True])
+def test_optimised_forward_matches_reference(res, fusion, opacity):
+    """forward() (channels-first) == forward_reference() (original code): outputs and
+    gradients w.r.t. planes, CNN, MLP and means."""
+    torch.manual_seed(0)
+    fld = TriplaneField(
+        _AABB_FOR_RNG_TEST,
+        TriplaneFieldConfig(channels=4, resolutions=res, fusion=fusion, plane_cnn=True,
+                            grad_to_means=True, predict_opacity=opacity),
+    )
+    for c in fld.cnns:
+        torch.nn.init.normal_(c.conv2.weight, std=0.1)
+    torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+    torch.nn.init.normal_(fld.mlp[-1].bias, std=0.1)
+    torch.manual_seed(1)
+    means0 = torch.cat([torch.rand(200, 3) * 3 - 1.5, torch.randn(20, 3) * 3])
+    results = {}
+    for name in ("forward", "forward_reference"):
+        fld.zero_grad(set_to_none=True)
+        means = means0.clone().requires_grad_()
+        out = getattr(fld, name)(means)
+        loss = (out["sh0"] * torch.linspace(-1, 1, out["sh0"].numel()).view_as(out["sh0"])).sum()
+        if opacity:
+            loss = loss + out["opacities"].pow(2).sum()
+        loss.backward()
+        results[name] = (out, {n: p.grad.clone() for n, p in fld.named_parameters()}, means.grad.clone())
+    (o1, g1, m1), (o2, g2, m2) = results["forward"], results["forward_reference"]
+    for k in o1:
+        assert o1[k].shape == o2[k].shape and torch.allclose(o1[k], o2[k], atol=1e-6), k
+    for n in g1:
+        assert torch.allclose(g1[n], g2[n], atol=1e-5, rtol=1e-4), n
+    assert torch.allclose(m1, m2, atol=1e-5, rtol=1e-4)
