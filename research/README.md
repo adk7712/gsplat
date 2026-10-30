@@ -29,6 +29,10 @@ Upstream gsplat is untouched: all new code lives in `research/` and `kaggle/`.
   instead of an ABI mismatch. The exact torch, CUDA and gsplat versions are recorded in every
   result JSON (`extra.torch`, `extra.torch_cuda`, `extra.gsplat`) and in `_summary.json`.
   gsplat needs torch ≥ 2.7.
+* **Pinned (as run on Kaggle, 2026-10-30)**: Python 3.13, torch **2.11.0+cu128**, CUDA **12.8**,
+  gsplat **1.6.0** (this fork), wheel `gsplat-1.6.0-cp313-cp313-linux_x86_64.whl` stored in
+  `adk7712/gsplat-wheels` under `torch2.11.0_cu128/`. Building it from source on Kaggle takes
+  ~65 min, so keep the dataset in sync if the Kaggle image's torch changes.
 * **GPU**: Tesla T4 (16 GB, sm_75). The runner refuses to run on anything else.
 
 ## Running locally (CUDA machine)
@@ -79,6 +83,9 @@ one per GPU. Commit **and push** before launching: the kernel clones `ref` from 
 * **Peak VRAM**: `torch.cuda.max_memory_allocated` during training (reserved in `extra`).
 * **Train time**: wall clock of the 30k-iteration loop, excluding data loading and eval.
 * **Reference**: 3DGS (Kerbl et al. 2023), lego PSNR **35.78**, NeRF-Synthetic average 33.32.
+* **Sanity check (Checkpoint A)**: vanilla, lego, seed 0, 30k iters on a T4: PSNR 35.67,
+  SSIM 0.9822, LPIPS-VGG 0.0199, LPIPS-Alex 0.0106, 225 FPS, 314k Gaussians, 0.74 GB peak
+  allocated VRAM, 18.4 min training.
 
 ## The field (`research/triplane_field.py`)
 
