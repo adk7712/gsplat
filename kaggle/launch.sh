@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Usage: kaggle/launch.sh <config.json>
 set -euo pipefail
+# New-style Kaggle tokens (KGAT_...) must be passed as KAGGLE_API_TOKEN, not KAGGLE_KEY.
+if [[ "${KAGGLE_KEY:-}" == KGAT_* && -z "${KAGGLE_API_TOKEN:-}" ]]; then
+  export KAGGLE_API_TOKEN="$KAGGLE_KEY"; unset KAGGLE_KEY
+fi
 
 CFG="${1:-}"
 [ -n "$CFG" ] && [ -f "$CFG" ] || { echo "usage: $0 <config.json>" >&2; exit 2; }

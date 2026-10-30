@@ -61,3 +61,10 @@ Kaggle secret `GH_TOKEN` (Add-ons -> Secrets, attached to the kernel).
 Private datasets are per account, so each teammate must create their own copies of both
 datasets (or share them via the Kaggle UI). `launch.sh` rewrites the dataset owner prefixes
 to `$KAGGLE_USERNAME`.
+
+## Notes
+- New-style Kaggle API tokens (`KGAT_...`) must be passed as `KAGGLE_API_TOKEN`; the scripts
+  map `KAGGLE_KEY=KGAT_...` to it automatically.
+- `adk7712/nerf-synthetic` was created as an unmodified private copy of the public Kaggle dataset
+  `nguyenhung1903/nerf-synthetic-dataset` (verified: 8 scenes, 100/100/200 frames, 800x800 RGBA).
+  Teammates can instead put `nguyenhung1903/nerf-synthetic-dataset` in `dataset_sources`.
