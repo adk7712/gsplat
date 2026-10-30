@@ -133,3 +133,5 @@ results
 planning/*.html
 
 scratch/**
+# Kaggle/research artifacts (results, data, build are already covered above)
+*.whl

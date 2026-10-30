@@ -1,0 +1,13 @@
+{
+  "id": "adk7712/splat-runner",
+  "title": "splat-runner",
+  "code_file": "run.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["adk7712/gsplat-wheels", "adk7712/nerf-synthetic"],
+  "competition_sources": [],
+  "kernel_sources": []
+}
