@@ -56,10 +56,43 @@ class TriplaneFieldConfig:
     # Let the field's gradient reach the Gaussian means. Off by default: the field
     # sees detached means, so geometry is optimised exactly as in vanilla gsplat.
     grad_to_means: bool = False
+    # Plane sampler. Both compute the same bilinear sample (align_corners=True,
+    # border padding). "grid_sample" is F.grid_sample. "embedding" (added after
+    # Checkpoint B, to cut training overhead) stores each plane as rows of [R*R, C]
+    # and uses F.embedding_bag with the 4 bilinear corner weights: reads/writes are
+    # contiguous C-vectors and the CUDA backward is a sorted segment-sum instead of
+    # per-channel atomicAdds, which collide heavily when Gaussians cluster.
+    sampler: str = "grid_sample"
     # Plane init range. Product fusion needs non-zero planes (a zero factor kills
     # the feature and its gradient), so we follow K-Planes: U(0.1, 0.5).
     init_low: float = 0.1
     init_high: float = 0.5
+
+
+def _bilinear_embedding(
+    plane: torch.Tensor, u_norm: torch.Tensor, v_norm: torch.Tensor
+) -> torch.Tensor:
+    """NEW. Same result as F.grid_sample(plane, (u, v), bilinear, padding_mode="border",
+    align_corners=True), computed as a weighted F.embedding_bag over the 4 corners.
+
+    plane: [1, C, H, W]; u_norm indexes W, v_norm indexes H, both in [-1, 1].
+    Returns [N, C].
+    """
+    _, C, H, W = plane.shape
+    # align_corners=True: -1 -> pixel 0, +1 -> pixel size-1; border: clamp to the edge.
+    u = ((u_norm + 1) * 0.5 * (W - 1)).clamp(0, W - 1)
+    v = ((v_norm + 1) * 0.5 * (H - 1)).clamp(0, H - 1)
+    x0 = u.detach().floor().clamp(max=W - 2)  # so that x1 = x0 + 1 is always valid
+    y0 = v.detach().floor().clamp(max=H - 2)
+    wx, wy = u - x0, v - y0  # in [0, 1]; differentiable w.r.t. the means if needed
+    x0, y0 = x0.long(), y0.long()
+    i00 = y0 * W + x0
+    idx = torch.stack([i00, i00 + 1, i00 + W, i00 + W + 1], dim=1)  # [N, 4]
+    w = torch.stack(
+        [(1 - wx) * (1 - wy), wx * (1 - wy), (1 - wx) * wy, wx * wy], dim=1
+    )  # [N, 4]
+    table = plane[0].permute(1, 2, 0).reshape(H * W, C)  # row y*W + x = plane[:, y, x]
+    return F.embedding_bag(idx, table, per_sample_weights=w, mode="sum")
 
 
 class PlaneCNN(nn.Module):
@@ -98,6 +131,7 @@ class TriplaneField(nn.Module):
     def __init__(self, aabb: torch.Tensor, cfg: TriplaneFieldConfig):
         super().__init__()
         assert cfg.fusion in ("product", "concat"), cfg.fusion
+        assert cfg.sampler in ("grid_sample", "embedding"), cfg.sampler
         self.cfg = cfg
         self.register_buffer("aabb", aabb.detach().clone().float().reshape(2, 3))
 
@@ -168,9 +202,13 @@ class TriplaneField(nn.Module):
         for r in range(len(self.cfg.resolutions)):
             per_plane = []
             for k, (a, b) in enumerate(PLANE_AXES):
+                plane = planes[r * n_planes + k]
+                if self.cfg.sampler == "embedding":
+                    per_plane.append(_bilinear_embedding(plane, x[:, a], x[:, b]))
+                    continue
                 grid = x[:, [a, b]].view(1, -1, 1, 2)  # [1, N, 1, 2]
                 f = F.grid_sample(
-                    planes[r * n_planes + k],
+                    plane,
                     grid,
                     mode="bilinear",
                     padding_mode="border",

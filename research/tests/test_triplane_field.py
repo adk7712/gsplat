@@ -306,3 +306,33 @@ def test_field_residual_stats_after_densification():
     splats = {"means": torch.rand(45, 3), "sh0": torch.rand(45, 1, 3) + 0.1}  # N grew
     d, rel = train.field_residual_stats(splats, fld)
     assert d.item() > 0 and torch.isfinite(rel)
+
+
+# --- Added with the embedding_bag sampler (overhead investigation) -------------------
+@pytest.mark.parametrize("res", [(8,), (4, 8, 16)])
+@pytest.mark.parametrize("fusion", ["product", "concat"])
+def test_embedding_sampler_matches_grid_sample(res, fusion):
+    """Same features and same gradients (planes, CNN, MLP, means) for both samplers."""
+    outs, grads = {}, {}
+    for sampler in ("grid_sample", "embedding"):
+        torch.manual_seed(0)
+        fld = TriplaneField(
+            _AABB_FOR_RNG_TEST,
+            TriplaneFieldConfig(channels=4, resolutions=res, fusion=fusion, plane_cnn=True,
+                                grad_to_means=True, sampler=sampler),
+        )
+        for c in fld.cnns:
+            torch.nn.init.normal_(c.conv2.weight, std=0.1)
+        torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+        torch.manual_seed(1)
+        # inside the box, plus points outside (border clamp) and exactly on the faces
+        means = torch.cat([torch.rand(200, 3) * 3 - 1.5, torch.randn(20, 3) * 3,
+                           torch.tensor([[1.5, -1.5, 0.3], [-1.5, 1.5, 1.5]])]).requires_grad_()
+        out = fld(means)["sh0"]
+        (out * torch.randn_like(out, generator=torch.Generator().manual_seed(2))).sum().backward()
+        outs[sampler] = out.detach()
+        grads[sampler] = {n: p.grad.clone() for n, p in fld.named_parameters()}
+        grads[sampler]["means"] = means.grad[:200].clone()  # interior points only
+    assert torch.allclose(outs["grid_sample"], outs["embedding"], atol=1e-6)
+    for n in grads["grid_sample"]:
+        assert torch.allclose(grads["grid_sample"][n], grads["embedding"][n], atol=1e-5), n

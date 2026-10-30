@@ -32,6 +32,10 @@ for i, j in enumerate(cfg["jobs"]):
     for k in ("variant", "scene", "seed"):
         if k not in j:
             sys.exit(f"ERROR: job {i} missing '{k}'")
+    if "script" in j:  # non-training job (e.g. research/bench_field.py)
+        if not os.path.isfile(os.path.join(root, j["script"])):
+            sys.exit(f"ERROR: job {i}: script {j['script']} does not exist")
+        continue
     p = os.path.join(root, "research", "configs", j["variant"] + ".json")
     if not os.path.isfile(p):
         sys.exit(f"ERROR: job {i}: {p} does not exist")

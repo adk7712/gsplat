@@ -231,16 +231,22 @@ def main():
                 j = q.get_nowait()
             except queue.Empty:
                 return
-            name = f"{j['variant']}_{j['scene']}_{j['seed']}"
+            # Optional per-job keys: "name" (log/record name), "args" (extra CLI tokens for
+            # this job only, appended last so they override), "script" (run this script
+            # with "args" + --result_dir instead of train.py, e.g. research/bench_field.py).
+            name = j.get("name") or f"{j['variant']}_{j['scene']}_{j['seed']}"
             log = f"{LOGS}/{name}.log"
-            cmd = [sys.executable, "research/train.py",
-                   "--config", f"research/configs/{j['variant']}.json",
-                   "--data_dir", scene_dirs[j["scene"]],
-                   "--scene", j["scene"], "--seed", str(j["seed"]),
-                   "--result_dir", RESULTS]
-            if iters:
-                cmd += ["--iters", str(iters)]
-            cmd += extra_args
+            if "script" in j:
+                cmd = [sys.executable, j["script"], "--result_dir", RESULTS] + list(j.get("args", []))
+            else:
+                cmd = [sys.executable, "research/train.py",
+                       "--config", f"research/configs/{j['variant']}.json",
+                       "--data_dir", scene_dirs[j["scene"]],
+                       "--scene", j["scene"], "--seed", str(j["seed"]),
+                       "--result_dir", RESULTS]
+                if iters:
+                    cmd += ["--iters", str(iters)]
+                cmd += extra_args + list(j.get("args", []))
             print(f"[gpu{gpu}] START {name}", flush=True)
             t0 = time.time()
             try:

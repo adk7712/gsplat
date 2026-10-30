@@ -86,6 +86,9 @@ class Config:
     field_aabb: List[float] = dc_field(
         default_factory=lambda: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5]
     )
+    # Plane sampler: "grid_sample" or "embedding" (identical maths, see
+    # triplane_field._bilinear_embedding; added for the training-overhead fix).
+    field_sampler: str = "grid_sample"
     plane_cnn: bool = False
     plane_cnn_off_after: int = -1
     tv_weight: float = 1e-4
@@ -270,6 +273,7 @@ def main() -> None:
             cnn_off_after=cfg.plane_cnn_off_after,
             reg_on_raw=cfg.reg_on_raw,
             grad_to_means=cfg.field_grad_to_means,
+            sampler=cfg.field_sampler,
         )
         # Build the field under a forked RNG: its random init must not consume the
         # global CPU RNG, otherwise the view order (torch.randperm below) would differ
