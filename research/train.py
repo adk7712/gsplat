@@ -176,12 +176,12 @@ def create_splats(cfg: Config, scene_scale: float, device):
     return splats, optimizers
 
 
-def effective_attributes(splats, fld):
-    """NEW: attr = attr_param + field(mu). Vanilla when fld is None."""
+def effective_attributes(splats, fld, planes=None):
+    """NEW: attr = attr_param + field(mu). Vanilla when fld is None.
+    ``planes``: effective planes computed once this step (shared with the regulariser)."""
     sh0, opa = splats["sh0"], splats["opacities"]
     if fld is not None:
-        mu = splats["means"] if fld.grad_to_means else splats["means"].detach()
-        res = fld(mu)
+        res = fld(splats["means"], planes)  # detaches means unless grad_to_means
         sh0 = sh0 + res["sh0"]
         if "opacities" in res:
             opa = opa + res["opacities"]
@@ -258,9 +258,15 @@ def main() -> None:
             plane_cnn=cfg.plane_cnn,
             cnn_off_after=cfg.plane_cnn_off_after,
             reg_on_raw=cfg.reg_on_raw,
+            grad_to_means=cfg.field_grad_to_means,
         )
-        fld = TriplaneField(torch.tensor(cfg.field_aabb).view(2, 3), fcfg).to(device)
-        fld.grad_to_means = cfg.field_grad_to_means
+        # Build the field under a forked RNG: its random init must not consume the
+        # global CPU RNG, otherwise the view order (torch.randperm below) would differ
+        # from vanilla for the same seed. (Found in the pre-Checkpoint-B review.)
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(cfg.seed + 1_000_003)
+            fld = TriplaneField(torch.tensor(cfg.field_aabb).view(2, 3), fcfg)
+        fld = fld.to(device)
         fld_opt, fld_sched = make_field_optimizer(
             fld, cfg.plane_lr, cfg.cnn_lr, cfg.mlp_lr, cfg.iters
         )
@@ -276,10 +282,12 @@ def main() -> None:
         if not order:  # 3DGS: random views without replacement, refilled each epoch
             order = torch.randperm(len(train_imgs)).tolist()
         idx = order.pop()
+        planes = None
         if fld is not None:
             fld.set_step(step)  # drives --plane_cnn_off_after
+            planes = fld.effective_planes()  # CNN runs once per step
 
-        attrs = effective_attributes(splats, fld)
+        attrs = effective_attributes(splats, fld, planes)
         sh_degree = min(step // cfg.sh_degree_interval, cfg.sh_degree)
         renders, alphas, info = rasterization(
             **attrs,
@@ -309,7 +317,7 @@ def main() -> None:
             loss = loss + cfg.scale_reg * attrs["scales"].mean()
         reg = None
         if fld is not None:
-            reg = fld.regularization(cfg.tv_weight, cfg.l1_weight)  # post-CNN planes
+            reg = fld.regularization(cfg.tv_weight, cfg.l1_weight, planes)  # post-CNN
             loss = loss + reg
         loss.backward()
 
@@ -340,7 +348,13 @@ def main() -> None:
                    f"mem {torch.cuda.max_memory_allocated() / 2**30:.2f}GB "
                    f"t {(time.perf_counter() - t_start) / 60:.1f}min")
             if reg is not None:
-                msg += f" reg {reg.item():.2e} cnn {'on' if fld.cnn_active else 'off'}"
+                # Size of the field's colour residual relative to the stored sh0: shows
+                # whether the field contributes at all (review note on the small mlp_lr).
+                with torch.no_grad():
+                    d_sh0 = (attrs["colors"][:, 0] - splats["sh0"][:, 0]).abs().mean()
+                    rel = d_sh0 / splats["sh0"].abs().mean().clamp_min(1e-12)
+                msg += (f" reg {reg.item():.2e} field|dsh0| {d_sh0.item():.2e}"
+                        f" ({rel.item():.1%}) cnn {'on' if fld.cnn_active else 'off'}")
             print(msg, flush=True)
 
     torch.cuda.synchronize()

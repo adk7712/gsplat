@@ -53,6 +53,9 @@ class TriplaneFieldConfig:
     plane_cnn: bool = False  # enable the residual plane CNN
     cnn_off_after: int = -1  # bypass the CNN for step >= this (-1 = never)
     reg_on_raw: bool = False  # ablation: regularise raw planes instead of effective
+    # Let the field's gradient reach the Gaussian means. Off by default: the field
+    # sees detached means, so geometry is optimised exactly as in vanilla gsplat.
+    grad_to_means: bool = False
     # Plane init range. Product fusion needs non-zero planes (a zero factor kills
     # the feature and its gradient), so we follow K-Planes: U(0.1, 0.5).
     init_low: float = 0.1
@@ -180,18 +183,30 @@ class TriplaneField(nn.Module):
                 feats.append(torch.cat(per_plane, dim=-1))
         return torch.cat(feats, dim=-1)  # concatenate across resolutions
 
-    def forward(self, means: torch.Tensor) -> Dict[str, torch.Tensor]:
-        """Returns residuals: {"sh0": [N, 1, 3], "opacities": [N] (if enabled)}."""
-        out = self.mlp(self.features(means))
+    def forward(
+        self, means: torch.Tensor, planes: Optional[List[torch.Tensor]] = None
+    ) -> Dict[str, torch.Tensor]:
+        """Returns residuals: {"sh0": [N, 1, 3], "opacities": [N] (if enabled)}.
+
+        ``planes``: pass the output of ``effective_planes()`` to reuse it for the
+        regulariser in the same step (the CNN then runs once per step, not twice).
+        """
+        if not self.cfg.grad_to_means:
+            means = means.detach()
+        out = self.mlp(self.features(means, planes))
         res = {"sh0": out[:, :3].unsqueeze(1)}
         if self.cfg.predict_opacity:
             res["opacities"] = out[:, 3]
         return res
 
     # ------------------------------------------------------------------ regularisers
-    def _reg_planes(self) -> List[torch.Tensor]:
+    def _reg_planes(
+        self, planes: Optional[List[torch.Tensor]] = None
+    ) -> List[torch.Tensor]:
         # FIX vs. our 4D code: regularise what the sampler actually sees (post-CNN).
-        return list(self.planes) if self.cfg.reg_on_raw else self.effective_planes()
+        if self.cfg.reg_on_raw:
+            return list(self.planes)
+        return planes if planes is not None else self.effective_planes()
 
     @staticmethod
     def tv(planes: List[torch.Tensor]) -> torch.Tensor:
@@ -207,10 +222,16 @@ class TriplaneField(nn.Module):
     def l1(planes: List[torch.Tensor]) -> torch.Tensor:
         return sum(p.abs().mean() for p in planes) / len(planes)
 
-    def regularization(self, tv_weight: float, l1_weight: float) -> torch.Tensor:
+    def regularization(
+        self,
+        tv_weight: float,
+        l1_weight: float,
+        planes: Optional[List[torch.Tensor]] = None,
+    ) -> torch.Tensor:
+        """``planes``: effective planes already computed this step (optional)."""
         if tv_weight == 0 and l1_weight == 0:
             return self.planes[0].new_zeros(())
-        planes = self._reg_planes()
+        planes = self._reg_planes(planes)
         loss = self.planes[0].new_zeros(())
         if tv_weight > 0:
             loss = loss + tv_weight * self.tv(planes)

@@ -255,3 +255,40 @@ def test_outside_aabb_border_clamped(fusion):
     out = fld(far)["sh0"]
     assert torch.isfinite(out).all()
     assert torch.allclose(out, fld(clamped)["sh0"], atol=1e-6)
+
+
+# --- Added after the pre-Checkpoint-B review --------------------------------------
+def test_field_construction_under_fork_rng_preserves_view_order():
+    """train.py builds the field under fork_rng so the view order matches vanilla."""
+    torch.manual_seed(0)
+    ref = torch.randperm(100)
+    torch.manual_seed(0)
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(1_000_003)
+        TriplaneField(_AABB_FOR_RNG_TEST, TriplaneFieldConfig(plane_cnn=True))
+    assert torch.equal(torch.randperm(100), ref)
+
+
+def test_means_detached_unless_grad_to_means():
+    for flag in (False, True):
+        fld = TriplaneField(
+            _AABB_FOR_RNG_TEST, TriplaneFieldConfig(channels=4, resolutions=(8,), grad_to_means=flag)
+        )
+        torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+        means = (torch.rand(50, 3) * 2 - 1).requires_grad_()
+        fld(means)["sh0"].sum().backward()
+        assert (means.grad is not None and means.grad.abs().sum() > 0) == flag
+
+
+def test_shared_planes_match_internal_planes():
+    fld = TriplaneField(_AABB_FOR_RNG_TEST, TriplaneFieldConfig(channels=4, resolutions=(8,), plane_cnn=True))
+    for c in fld.cnns:
+        torch.nn.init.normal_(c.conv2.weight, std=0.1)
+    torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+    means = torch.rand(50, 3) * 2 - 1
+    planes = fld.effective_planes()
+    assert torch.allclose(fld(means, planes)["sh0"], fld(means)["sh0"])
+    assert torch.allclose(fld.regularization(1.0, 0.1, planes), fld.regularization(1.0, 0.1))
+
+
+_AABB_FOR_RNG_TEST = torch.tensor([[-1.5] * 3, [1.5] * 3])
