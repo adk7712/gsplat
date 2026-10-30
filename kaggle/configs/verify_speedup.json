@@ -1,0 +1,42 @@
+{
+ "repo_url": "https://github.com/adk7712/gsplat.git",
+ "ref": "13c58fcff8487a9535fe493f8c7e5605fe024d33",
+ "jobs": [
+  {
+   "variant": "triplane",
+   "scene": "lego",
+   "seed": 0,
+   "name": "triplane_cf7k_lego_0",
+   "args": [
+    "--iters",
+    "7000",
+    "--variant",
+    "triplane_cf7k"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "lego",
+   "seed": 0,
+   "name": "triplane_cnn_cf7k_lego_0",
+   "args": [
+    "--iters",
+    "7000",
+    "--variant",
+    "triplane_cnn_cf7k"
+   ]
+  },
+  {
+   "variant": "bench",
+   "scene": "lego",
+   "seed": 0,
+   "name": "bench_field_cf",
+   "script": "research/bench_field.py",
+   "args": [
+    "--n",
+    "150000",
+    "313000"
+   ]
+  }
+ ]
+}
