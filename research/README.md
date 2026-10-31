@@ -87,8 +87,15 @@ one per GPU. Commit **and push** before launching: the kernel clones `ref` from 
   lego 35.78, drums 26.15, ficus 34.87, hotdog 37.72, average **33.32**. The paper reports only PSNR for
   this dataset. Our vanilla 3-seed means: 35.38 / 36.01 / 30.84 / 29.97 / 35.72 / 26.14 / 34.85 / 37.71,
   average **33.33** (all scenes within 0.2 dB).
-  **Unverified:** the exact init range [-1.3, 1.3]^3 (the paper only says "a volume that encloses the scene
-  bounds") and the note on the 3DGS repo's LPIPS input range (code, not checked).
+  Verified in the 3DGS code (graphdeco-inria/gaussian-splatting, main @ 54c035f): Blender init is
+  `xyz = np.random.random((100_000, 3)) * 2.6 - 1.3`, i.e. uniform in [-1.3, 1.3]^3
+  (`scene/dataset_readers.py`). Its `metrics.py` loads images with `to_tensor` ([0, 1]) and passes them
+  straight to `lpipsPyTorch`, whose network applies the LPIPS shift/scale constants
+  (-.030,-.088,-.188)/(.458,.448,.450). The original LPIPS code (richzhang/PerceptualSimilarity @ 082bb24,
+  `lpips/lpips.py`) applies the same constants and says to rescale [0, 1] inputs to [-1, 1]
+  (`normalize=True`), so 3DGS's LPIPS skips that rescaling. Ours uses torchmetrics with `normalize=True`,
+  which does rescale (checked in torchmetrics 1.9.0 here; **the torchmetrics version installed on Kaggle
+  was not checked**).
 * **Sanity check (Checkpoint A)**: vanilla, lego, seed 0, 30k iters on a T4: PSNR 35.67,
   SSIM 0.9822, LPIPS-VGG 0.0199, LPIPS-Alex 0.0106, 225 FPS, 314k Gaussians, 0.74 GB peak
   allocated VRAM, 18.4 min training.
