@@ -82,7 +82,7 @@ one per GPU. Commit **and push** before launching: the kernel clones `ref` from 
   time); that one-off cost is `extra.field_query_ms`.
 * **Peak VRAM**: `torch.cuda.max_memory_allocated` during training (reserved in `extra`).
 * **Train time**: wall clock of the 30k-iteration loop, excluding data loading and eval.
-* **Reference**: 3DGS (Kerbl et al. 2023), lego PSNR **35.78**, NeRF-Synthetic average 33.32.
+* **Reference**: 3DGS (Kerbl et al. 2023), lego PSNR **35.78**, NeRF-Synthetic average 33.32. **Unverified: these numbers, the claim that 3DGS reports only PSNR on NeRF-Synthetic, and the note on its LPIPS input range below were quoted from memory and not checked against the paper or code.**
 * **Sanity check (Checkpoint A)**: vanilla, lego, seed 0, 30k iters on a T4: PSNR 35.67,
   SSIM 0.9822, LPIPS-VGG 0.0199, LPIPS-Alex 0.0106, 225 FPS, 314k Gaussians, 0.74 GB peak
   allocated VRAM, 18.4 min training.

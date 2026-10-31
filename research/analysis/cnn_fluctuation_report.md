@@ -19,8 +19,10 @@ Data: 96 runs (4 variants × 8 scenes × 3 seeds, commit 13c58fc). "CNN effect" 
 
 **H1: the CNN tints "ghost" blobs in empty space (supported).** In chair and ship, 95–97% of the CNN's
 extra error sits in the white background, not on the object: a smudge under the chair seat and under
-the ship's base (`cnn_vs_nocnn.png`). These regions are poorly constrained (cameras only see them at
-grazing angles), so stray low-opacity Gaussians live there. The field colours every Gaussian from the
+the ship's base (`cnn_vs_nocnn.png`). **Unverified:** that these smudges are made of stray low-opacity
+Gaussians, and that these regions are poorly constrained because cameras see them only at grazing angles.
+No Gaussian positions or opacities were saved, and the only camera check done is that no training camera
+sits below these objects. The field colours every Gaussian from the
 three axis-aligned planes, and blobs directly under the object share the top-view plane cells with the
 object above. With the CNN smoothing the planes, they inherit the object's colour (green under the ship,
 dark under the seat).
@@ -38,7 +40,8 @@ Gaussians (ρ = −0.10), camera coverage below the object (ρ = +0.29), seed-to
 **Inconclusive:** overlapping surfaces in the plane projections (ρ = −0.57, p = 0.15; materials has by
 far the most overlap and is slightly hurt).
 
-Caveats: 8 scenes, 4 saved test views per run, about 8 tests run, so p = 0.04 is suggestive only;
+Unverified (from memory or visual reading, not measured): the scene descriptions (chair slats, ship
+rigging, mic mesh). Caveats: 8 scenes, 4 saved test views per run, about 8 tests run, so p = 0.04 is suggestive only;
 all evidence is correlational.
 
 ## What this implies
