@@ -1,0 +1,270 @@
+{
+  "git_commit": "13c58fcff8487a9535fe493f8c7e5605fe024d33",
+  "ref": "13c58fcff8487a9535fe493f8c7e5605fe024d33",
+  "gpu_names": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "torch_version": "2.11.0+cu128",
+  "torch_cuda": "12.8",
+  "gsplat_version": "1.6.0",
+  "wheel": "/kaggle/input/datasets/adk7712/gsplat-wheels/torch2.11.0_cu128/gsplat-1.6.0-cp313-cp313-linux_x86_64.whl",
+  "jobs": [
+    {
+      "variant": "triplane_cnn",
+      "scene": "chair",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 29.15,
+      "log": "/kaggle/working/logs/triplane_cnn_chair_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "drums",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 33.12,
+      "log": "/kaggle/working/logs/triplane_cnn_drums_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "ficus",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 30.09,
+      "log": "/kaggle/working/logs/triplane_cnn_ficus_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "hotdog",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 22.98,
+      "log": "/kaggle/working/logs/triplane_cnn_hotdog_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "lego",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 32.48,
+      "log": "/kaggle/working/logs/triplane_cnn_lego_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "materials",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 29.58,
+      "log": "/kaggle/working/logs/triplane_cnn_materials_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "mic",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 30.79,
+      "log": "/kaggle/working/logs/triplane_cnn_mic_2.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "ship",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 35.46,
+      "log": "/kaggle/working/logs/triplane_cnn_ship_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "chair",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 26.45,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_chair_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "drums",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 31.79,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_drums_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "ficus",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 27.32,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_ficus_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "hotdog",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 21.78,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_hotdog_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "lego",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 30.75,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_lego_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "materials",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 28.03,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_materials_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "mic",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 29.59,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_mic_2.log"
+    },
+    {
+      "variant": "triplane_cnn_off25k",
+      "scene": "ship",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 34.14,
+      "log": "/kaggle/working/logs/triplane_cnn_off25k_ship_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "chair",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 26.02,
+      "log": "/kaggle/working/logs/triplane_chair_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "drums",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 31.02,
+      "log": "/kaggle/working/logs/triplane_drums_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "ficus",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 26.71,
+      "log": "/kaggle/working/logs/triplane_ficus_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "hotdog",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 20.75,
+      "log": "/kaggle/working/logs/triplane_hotdog_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "lego",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 29.49,
+      "log": "/kaggle/working/logs/triplane_lego_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "materials",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 27.33,
+      "log": "/kaggle/working/logs/triplane_materials_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "mic",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 27.68,
+      "log": "/kaggle/working/logs/triplane_mic_2.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "ship",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 32.33,
+      "log": "/kaggle/working/logs/triplane_ship_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "chair",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 16.67,
+      "log": "/kaggle/working/logs/vanilla_chair_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "drums",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 19.15,
+      "log": "/kaggle/working/logs/vanilla_drums_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "ficus",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 16.88,
+      "log": "/kaggle/working/logs/vanilla_ficus_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "hotdog",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 15.13,
+      "log": "/kaggle/working/logs/vanilla_hotdog_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "lego",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 18.5,
+      "log": "/kaggle/working/logs/vanilla_lego_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "materials",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 17.52,
+      "log": "/kaggle/working/logs/vanilla_materials_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "mic",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 17.6,
+      "log": "/kaggle/working/logs/vanilla_mic_2.log"
+    },
+    {
+      "variant": "vanilla",
+      "scene": "ship",
+      "seed": 2,
+      "returncode": 0,
+      "minutes": 21.21,
+      "log": "/kaggle/working/logs/vanilla_ship_2.log"
+    }
+  ]
+}

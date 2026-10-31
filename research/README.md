@@ -156,3 +156,41 @@ At Checkpoint B the field nearly doubled training time (lego: 33 vs 18 min). Pro
   layout through fusion and the MLP (applied as `W @ h + b`), removing the strided copies.
   The original computation is kept as `forward_reference`; a CPU test checks outputs and
   all gradients match, and `bench_field.py` times both.
+
+## Phase 1 results (NeRF-Synthetic, 4 variants × 8 scenes × 3 seeds, T4, commit 13c58fc)
+
+Raw per-run JSONs: `research/results/phase1/` (96 runs, all exit code 0). Generate the tables with
+`python research/aggregate.py research/results/phase1`.
+
+PSNR, mean ± sample std over seeds 0–2:
+
+| Scene | vanilla | triplane | triplane_cnn | triplane_cnn_off25k |
+|---|---|---|---|---|
+| chair | 36.01 ± 0.05 | 35.91 ± 0.04 | 35.83 ± 0.07 | 35.73 ± 0.11 |
+| drums | 26.14 ± 0.01 | 26.15 ± 0.01 | 26.16 ± 0.01 | 26.14 ± 0.00 |
+| ficus | 34.85 ± 0.01 | 34.86 ± 0.01 | 34.85 ± 0.02 | 34.81 ± 0.02 |
+| hotdog | 37.71 ± 0.02 | 37.72 ± 0.04 | 37.77 ± 0.07 | 37.75 ± 0.06 |
+| lego | 35.72 ± 0.03 | 35.75 ± 0.01 | 35.76 ± 0.02 | 35.75 ± 0.01 |
+| materials | 29.97 ± 0.03 | 29.99 ± 0.03 | 29.94 ± 0.02 | 29.93 ± 0.01 |
+| mic | 35.38 ± 0.06 | 35.36 ± 0.02 | 35.54 ± 0.09 | 35.49 ± 0.07 |
+| ship | 30.84 ± 0.02 | 30.79 ± 0.03 | 30.74 ± 0.06 | 30.89 ± 0.04 |
+| **Average** | **33.33** ± 0.01 | **33.31** ± 0.01 | **33.32** ± 0.02 | **33.31** ± 0.03 |
+
+| Metric (mean over 8 scenes × 3 seeds) | vanilla | triplane | triplane_cnn | triplane_cnn_off25k |
+|---|---|---|---|---|
+| ssim | 0.9689 | 0.9691 | 0.9690 | 0.9690 |
+| lpips_vgg | 0.0379 | 0.0377 | 0.0377 | 0.0379 |
+| lpips_alex | 0.0234 | 0.0232 | 0.0230 | 0.0232 |
+| fps | 263 | 262 | 259 | 267 |
+| num_gaussians | 283888 | 283996 | 283964 | 284152 |
+| peak_vram_gb | 0.70 | 0.97 | 0.99 | 0.99 |
+| train_minutes | 16.9 | 26.8 | 28.4 | 28.0 |
+
+**Conclusions**
+- None of the variants improves on vanilla gsplat on average (8-scene mean within 0.02 dB). The field
+  adds ~60% training time and ~0.3 GB peak VRAM, and leaves FPS unchanged.
+- The plane CNN has scene-dependent effects that hold in all 3 seeds: vs vanilla it is better on mic,
+  hotdog, lego and drums, and worse on chair, ship and materials. These cancel out on average.
+- `triplane_cnn_off25k` removes the CNN abruptly, which causes a large transient drop at step 25k
+  (seen in training logs), so it does not cleanly test late over-smoothing.
+- Why the CNN helps some scenes and hurts others: see `research/analysis/cnn_fluctuation_report.md`.

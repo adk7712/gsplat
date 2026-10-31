@@ -190,6 +190,10 @@ def main():
         print("# (see kaggle/README_kaggle.md: `kaggle datasets version -p wheels_ds -m ... --dir-mode zip`).")
         print("#" * 78 + "\n", flush=True)
     run([sys.executable, "-m", "pip", "install", "-q"] + EXTRA_PIP, check_msg="pip install of extra packages failed")
+    # Record the exact Python package versions of this run (e.g. torchmetrics), so results
+    # can be tied to library versions later (added after Phase 1; they were not recorded).
+    os.makedirs(RESULTS, exist_ok=True)
+    run([sys.executable, "-m", "pip", "freeze"], log=f"{RESULTS}/_pip_freeze.txt", show=False)
     p = run([sys.executable, "-c",
              "import gsplat, torch; from gsplat.cuda._backend import _C; "
              "print(gsplat.__version__, _C is not None); "

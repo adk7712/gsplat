@@ -135,3 +135,6 @@ planning/*.html
 scratch/**
 # Kaggle/research artifacts (results, data, build are already covered above)
 *.whl
+
+# Small Phase 1 result JSONs are committed on purpose (user-approved)
+!research/results/
