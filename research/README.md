@@ -82,7 +82,13 @@ one per GPU. Commit **and push** before launching: the kernel clones `ref` from 
   time); that one-off cost is `extra.field_query_ms`.
 * **Peak VRAM**: `torch.cuda.max_memory_allocated` during training (reserved in `extra`).
 * **Train time**: wall clock of the 30k-iteration loop, excluding data loading and eval.
-* **Reference**: 3DGS (Kerbl et al. 2023), lego PSNR **35.78**, NeRF-Synthetic average 33.32. **Unverified: these numbers, the claim that 3DGS reports only PSNR on NeRF-Synthetic, and the note on its LPIPS input range below were quoted from memory and not checked against the paper or code.**
+* **Reference** (verified against arXiv 2308.04079, Table 2, p. 8): 3DGS-30K PSNR on Synthetic NeRF
+  (white background, 100K random initial points) is mic 35.36, chair 35.83, ship 30.80, materials 30.00,
+  lego 35.78, drums 26.15, ficus 34.87, hotdog 37.72, average **33.32**. The paper reports only PSNR for
+  this dataset. Our vanilla 3-seed means: 35.38 / 36.01 / 30.84 / 29.97 / 35.72 / 26.14 / 34.85 / 37.71,
+  average **33.33** (all scenes within 0.2 dB).
+  **Unverified:** the exact init range [-1.3, 1.3]^3 (the paper only says "a volume that encloses the scene
+  bounds") and the note on the 3DGS repo's LPIPS input range (code, not checked).
 * **Sanity check (Checkpoint A)**: vanilla, lego, seed 0, 30k iters on a T4: PSNR 35.67,
   SSIM 0.9822, LPIPS-VGG 0.0199, LPIPS-Alex 0.0106, 225 FPS, 314k Gaussians, 0.74 GB peak
   allocated VRAM, 18.4 min training.
