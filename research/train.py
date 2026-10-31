@@ -83,6 +83,12 @@ class Config:
     # Gaussians around: geometry is optimised exactly as in vanilla and the
     # comparison isolates the appearance model. Flip to let gradients reach means.
     field_grad_to_means: bool = False
+    # Opacity gate (added after Phase 1): scale each Gaussian's colour residual by its own
+    # (detached) opacity, so faint, low-opacity Gaussians (suspected "ghost" floaters that
+    # the CNN-smoothed planes tinted, see research/analysis/cnn_fluctuation_report.md) get
+    # little field colour while solid Gaussians get almost all of it. Detached so the field
+    # cannot push opacities up or down to change its own gate.
+    field_opacity_gate: bool = False
     field_aabb: List[float] = dc_field(
         default_factory=lambda: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5]
     )
@@ -96,6 +102,9 @@ class Config:
     mlp_lr: float = 1.6e-4
     # --- outputs ------------------------------------------------------------------
     save_render_indices: List[int] = dc_field(default_factory=lambda: [0, 50, 100, 150])
+    # Diagnostics (added after Phase 1): save final per-Gaussian means, opacities, stored sh0
+    # and field sh0 residual as float16 .npz under <result_dir>/gaussians/.
+    save_gaussians: bool = False
     log_every: int = 1000
 
 
@@ -176,13 +185,17 @@ def create_splats(cfg: Config, scene_scale: float, device):
     return splats, optimizers
 
 
-def effective_attributes(splats, fld, planes=None):
+def effective_attributes(splats, fld, planes=None, opacity_gate=False):
     """NEW: attr = attr_param + field(mu). Vanilla when fld is None.
-    ``planes``: effective planes computed once this step (shared with the regulariser)."""
+    ``planes``: effective planes computed once this step (shared with the regulariser).
+    ``opacity_gate``: scale the colour residual by sigmoid(stored opacity), detached."""
     sh0, opa = splats["sh0"], splats["opacities"]
     if fld is not None:
         res = fld(splats["means"], planes)  # detaches means unless grad_to_means
-        sh0 = sh0 + res["sh0"]
+        if opacity_gate:
+            sh0 = sh0 + torch.sigmoid(splats["opacities"]).detach()[:, None, None] * res["sh0"]
+        else:
+            sh0 = sh0 + res["sh0"]
         if "opacities" in res:
             opa = opa + res["opacities"]
     return {
@@ -298,7 +311,7 @@ def main() -> None:
             fld.set_step(step)  # drives --plane_cnn_off_after
             planes = fld.effective_planes()  # CNN runs once per step
 
-        attrs = effective_attributes(splats, fld, planes)
+        attrs = effective_attributes(splats, fld, planes, cfg.field_opacity_gate)
         sh_degree = min(step // cfg.sh_degree_interval, cfg.sh_degree)
         renders, alphas, info = rasterization(
             **attrs,
@@ -377,7 +390,7 @@ def main() -> None:
             fld.set_step(cfg.iters)
         torch.cuda.synchronize()
         tq = time.perf_counter()
-        baked = effective_attributes(splats, fld)
+        baked = effective_attributes(splats, fld, opacity_gate=cfg.field_opacity_gate)
         torch.cuda.synchronize()
         field_query_ms = (time.perf_counter() - tq) * 1000.0
 
@@ -429,6 +442,26 @@ def main() -> None:
             "gsplat": __import__("gsplat").__version__,
         },
     }
+    if cfg.save_gaussians:
+      try:  # diagnostics must never cost us the run's metrics JSON
+        with torch.no_grad():
+            out = {
+                "means": splats["means"],
+                "opacity": torch.sigmoid(splats["opacities"]),
+                "sh0": splats["sh0"][:, 0],
+                "scale_max": torch.exp(splats["scales"]).max(-1).values,
+            }
+            if fld is not None:
+                out["field_sh0"] = fld(splats["means"])["sh0"][:, 0]  # ungated residual
+            gdir = os.path.join(cfg.result_dir, "gaussians")
+            os.makedirs(gdir, exist_ok=True)
+            np.savez_compressed(
+                os.path.join(gdir, f"{tag}.npz"),
+                **{k: v.float().cpu().numpy().astype(np.float16) for k, v in out.items()},
+            )
+      except Exception as ex:
+        print(f"[{tag}] WARNING: save_gaussians failed: {ex!r}", flush=True)
+
     path = os.path.join(cfg.result_dir, f"{tag}.json")
     with open(path, "w") as f:
         json.dump(result, f, indent=2)

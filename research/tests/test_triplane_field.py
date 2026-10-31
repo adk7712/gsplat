@@ -343,3 +343,32 @@ def test_optimised_forward_matches_reference(res, fusion, opacity):
     for n in g1:
         assert torch.allclose(g1[n], g2[n], atol=1e-5, rtol=1e-4), n
     assert torch.allclose(m1, m2, atol=1e-5, rtol=1e-4)
+
+
+# --- Added with the opacity gate (post-Phase-1 fix test) ---------------------------
+def _splats(n=40):
+    torch.manual_seed(3)
+    return {"means": torch.rand(n, 3) * 2 - 1, "quats": torch.rand(n, 4), "scales": torch.zeros(n, 3),
+            "opacities": torch.randn(n).requires_grad_(), "sh0": torch.rand(n, 1, 3),
+            "shN": torch.zeros(n, 15, 3)}
+
+
+def test_opacity_gate_scales_residual_and_blocks_opacity_grad():
+    import train
+
+    fld = TriplaneField(_AABB_FOR_RNG_TEST, TriplaneFieldConfig(channels=4, resolutions=(8,)))
+    sp = _splats()
+    # zero-init field: gated and ungated both equal vanilla
+    for gate in (False, True):
+        a = train.effective_attributes(sp, fld, opacity_gate=gate)
+        assert torch.equal(a["colors"][:, :1], sp["sh0"])
+    torch.nn.init.normal_(fld.mlp[-1].weight, std=0.1)
+    res = fld(sp["means"])["sh0"]
+    ungated = train.effective_attributes(sp, fld, opacity_gate=False)["colors"][:, :1]
+    gated = train.effective_attributes(sp, fld, opacity_gate=True)
+    assert torch.allclose(ungated, sp["sh0"] + res)
+    g = torch.sigmoid(sp["opacities"]).detach()[:, None, None]
+    assert torch.allclose(gated["colors"][:, :1], sp["sh0"] + g * res)
+    # the gate is detached: colour loss sends no gradient into opacities
+    gated["colors"].sum().backward()
+    assert sp["opacities"].grad is None or sp["opacities"].grad.abs().sum() == 0
