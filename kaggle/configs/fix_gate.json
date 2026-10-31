@@ -1,0 +1,123 @@
+{
+ "repo_url": "https://github.com/adk7712/gsplat.git",
+ "ref": "76c921425d1046269e7c7dfe59160f73e749ea96",
+ "iters": 30000,
+ "jobs": [
+  {
+   "variant": "triplane",
+   "scene": "chair",
+   "seed": 0,
+   "name": "triplane_diag_chair_0",
+   "args": [
+    "--variant",
+    "triplane_diag",
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "chair",
+   "seed": 0,
+   "name": "triplane_cnn_diag_chair_0",
+   "args": [
+    "--variant",
+    "triplane_cnn_diag",
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "ship",
+   "seed": 0,
+   "name": "triplane_diag_ship_0",
+   "args": [
+    "--variant",
+    "triplane_diag",
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "ship",
+   "seed": 0,
+   "name": "triplane_cnn_diag_ship_0",
+   "args": [
+    "--variant",
+    "triplane_cnn_diag",
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "ship",
+   "seed": 0,
+   "args": [
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "ship",
+   "seed": 0,
+   "args": [
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "chair",
+   "seed": 0,
+   "args": [
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "chair",
+   "seed": 0,
+   "args": [
+    "--save_gaussians"
+   ]
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "materials",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "materials",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "lego",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "lego",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "mic",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "mic",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_cnn_gated",
+   "scene": "hotdog",
+   "seed": 0
+  },
+  {
+   "variant": "triplane_gated",
+   "scene": "hotdog",
+   "seed": 0
+  }
+ ]
+}
