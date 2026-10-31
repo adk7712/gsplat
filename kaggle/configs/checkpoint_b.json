@@ -1,2 +1,2 @@
-{"repo_url": "https://github.com/adk7712/gsplat.git", "ref": "claude/jolly-archimedes-ifh1mk", "iters": 30000,
+{"repo_url": "https://github.com/adk7712/gsplat.git", "ref": "triplane-field", "iters": 30000,
  "jobs": [{"variant": "triplane", "scene": "lego", "seed": 0}, {"variant": "triplane_cnn", "scene": "lego", "seed": 0}]}
