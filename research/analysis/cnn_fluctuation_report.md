@@ -54,3 +54,31 @@ all evidence is correlational.
 
 Scripts: `scene_props.py` (visual hull, plane coverage, overlap), `render_err.py` (error split by
 pixel type), `figure.py` (figure).
+
+## Follow-up: opacity-gate test and saved-Gaussian diagnostics (seed 0, 6 scenes, commit 76c9214)
+
+Raw results: `research/results/gate_test/` (16 runs, all exit code 0; Kaggle used torchmetrics 1.9.0,
+see `_pip_freeze.txt`). Old variants are the Phase 1 seed-0 runs (commit 13c58fc).
+
+PSNR change vs vanilla (seed 0):
+
+| Variant | mic | hotdog | lego | chair | ship | materials | mean | wins |
+|---|---|---|---|---|---|---|---|---|
+| triplane | +0.02 | +0.02 | +0.05 | −0.14 | −0.05 | +0.01 | −0.014 | 4/6 |
+| triplane_cnn | +0.27 | +0.11 | +0.08 | −0.30 | −0.19 | −0.06 | −0.016 | 3/6 |
+| triplane_gated | +0.12 | +0.02 | +0.02 | −0.14 | +0.07 | −0.01 | +0.013 | 4/6 |
+| triplane_cnn_gated | +0.07 | +0.05 | +0.01 | −0.10 | +0.02 | −0.01 | +0.008 | 4/6 |
+
+- The gate removes most of the CNN's losses on chair and ship (+0.21 each vs ungated), but also most
+  of its gains on mic, hotdog and lego (−0.20, −0.06, −0.07). Net: about the same as vanilla.
+- Likely reason (from the saved Gaussians): the median opacity of Gaussians inside the object is only
+  ~0.2–0.3, so gating by opacity shrinks the field's effect almost everywhere, not just on faint
+  "ghosts". The gate is not selective.
+- Re-running the same code with the same seed changed PSNR by up to 0.11 dB (triplane_cnn, chair),
+  so single-run differences of ~0.1 dB are within run-to-run noise. None of the gated results meets
+  the "meaningful" bar (≥ +0.1 dB mean).
+- Ghost check (`ghosts.py`): almost no Gaussians lie outside the chair's visual hull, with or without
+  the CNN. **Not settled:** the space under the seat is hidden from every camera, so the visual hull
+  most likely counts it as inside the object, which makes this test blind to the region where the
+  smudge appears. In ship, ~2% of Gaussians lie outside the hull and ~88% of those are faint, but this
+  is the same with and without the CNN. H1 is therefore neither confirmed nor ruled out.

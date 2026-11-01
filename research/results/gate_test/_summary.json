@@ -1,0 +1,142 @@
+{
+  "git_commit": "76c921425d1046269e7c7dfe59160f73e749ea96",
+  "ref": "76c921425d1046269e7c7dfe59160f73e749ea96",
+  "gpu_names": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "torch_version": "2.11.0+cu128",
+  "torch_cuda": "12.8",
+  "gsplat_version": "1.6.0",
+  "wheel": "/kaggle/input/datasets/adk7712/gsplat-wheels/torch2.11.0_cu128/gsplat-1.6.0-cp313-cp313-linux_x86_64.whl",
+  "jobs": [
+    {
+      "variant": "triplane",
+      "scene": "chair",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 26.3,
+      "log": "/kaggle/working/logs/triplane_diag_chair_0.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "chair",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 28.46,
+      "log": "/kaggle/working/logs/triplane_cnn_diag_chair_0.log"
+    },
+    {
+      "variant": "triplane",
+      "scene": "ship",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 32.82,
+      "log": "/kaggle/working/logs/triplane_diag_ship_0.log"
+    },
+    {
+      "variant": "triplane_cnn",
+      "scene": "ship",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 35.29,
+      "log": "/kaggle/working/logs/triplane_cnn_diag_ship_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "ship",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 32.02,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_ship_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "ship",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 32.02,
+      "log": "/kaggle/working/logs/triplane_gated_ship_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "chair",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 27.68,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_chair_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "chair",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 26.73,
+      "log": "/kaggle/working/logs/triplane_gated_chair_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "materials",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 28.18,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_materials_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "materials",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 27.36,
+      "log": "/kaggle/working/logs/triplane_gated_materials_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "lego",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 30.89,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_lego_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "lego",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 30.28,
+      "log": "/kaggle/working/logs/triplane_gated_lego_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "mic",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 29.63,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_mic_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "mic",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 28.81,
+      "log": "/kaggle/working/logs/triplane_gated_mic_0.log"
+    },
+    {
+      "variant": "triplane_cnn_gated",
+      "scene": "hotdog",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 22.46,
+      "log": "/kaggle/working/logs/triplane_cnn_gated_hotdog_0.log"
+    },
+    {
+      "variant": "triplane_gated",
+      "scene": "hotdog",
+      "seed": 0,
+      "returncode": 0,
+      "minutes": 21.55,
+      "log": "/kaggle/working/logs/triplane_gated_hotdog_0.log"
+    }
+  ]
+}
