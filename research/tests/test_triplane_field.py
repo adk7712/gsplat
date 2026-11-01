@@ -372,3 +372,13 @@ def test_opacity_gate_scales_residual_and_blocks_opacity_grad():
     # the gate is detached: colour loss sends no gradient into opacities
     gated["colors"].sum().backward()
     assert sp["opacities"].grad is None or sp["opacities"].grad.abs().sum() == 0
+
+
+def test_select_views_sparse():
+    import train
+
+    v = train.select_views(100, 12)
+    assert len(v) == 12 and v[0] == 0 and v[-1] == 99 and v == sorted(set(v))
+    assert train.select_views(100, -1) == list(range(100))
+    assert train.select_views(100, 100) == list(range(100))
+    assert len(train.select_views(100, 6)) == 6

@@ -105,6 +105,10 @@ class Config:
     # Diagnostics (added after Phase 1): save final per-Gaussian means, opacities, stored sh0
     # and field sh0 residual as float16 .npz under <result_dir>/gaussians/.
     save_gaussians: bool = False
+    # Sparse-view training (added after Phase 1): use only this many training views, picked
+    # evenly spaced over transforms_train.json (see select_views). -1 = all 100 views. The
+    # test set is unchanged (all 200 views). Scene scale is computed from the views used.
+    train_views: int = -1
     log_every: int = 1000
 
 
@@ -137,6 +141,14 @@ def parse_config() -> Config:
     args = vars(ap.parse_args())
     args.pop("config")
     return Config(**args)
+
+
+def select_views(n_total: int, k: int) -> List[int]:
+    """Evenly spaced view indices, e.g. 12 of 100 -> [0, 9, 18, ..., 99]. Deterministic and
+    independent of the seed, so every variant and seed trains on the same views."""
+    if k < 0 or k >= n_total:
+        return list(range(n_total))
+    return sorted({int(round(i)) for i in np.linspace(0, n_total - 1, k)})
 
 
 def set_seed(seed: int) -> None:
@@ -243,6 +255,11 @@ def main() -> None:
     print(f"[{tag}] config: {json.dumps(dataclasses.asdict(cfg))}", flush=True)
 
     train = load_split(cfg.data_dir, "train", cfg.white_bg)
+    views = select_views(len(train["images"]), cfg.train_views)
+    if len(views) < len(train["images"]):
+        train = {"images": train["images"][views], "camtoworlds": train["camtoworlds"][views],
+                 "K": train["K"], "names": [train["names"][i] for i in views]}
+        print(f"[{tag}] sparse views: training on {len(views)} views {views}", flush=True)
     test = load_split(cfg.data_dir, "test", cfg.white_bg)
     train_imgs = train["images"].to(device)  # uint8, ~190 MB for 100 x 800^2
     H, W = train_imgs.shape[1:3]
