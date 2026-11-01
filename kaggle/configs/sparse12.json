@@ -1,0 +1,295 @@
+{
+ "repo_url": "https://github.com/adk7712/gsplat.git",
+ "ref": "6b93dbb400c540a21bc0b723e2c4a03265cfb5e2",
+ "iters": 30000,
+ "jobs": [
+  {
+   "variant": "triplane_cnn",
+   "scene": "ship",
+   "seed": 0,
+   "name": "triplane_cnn_12v_ship_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "ship",
+   "seed": 0,
+   "name": "triplane_12v_ship_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "ship",
+   "seed": 0,
+   "name": "vanilla_12v_ship_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "drums",
+   "seed": 0,
+   "name": "triplane_cnn_12v_drums_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "drums",
+   "seed": 0,
+   "name": "triplane_12v_drums_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "drums",
+   "seed": 0,
+   "name": "vanilla_12v_drums_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "lego",
+   "seed": 0,
+   "name": "triplane_cnn_12v_lego_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "lego",
+   "seed": 0,
+   "name": "triplane_12v_lego_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "lego",
+   "seed": 0,
+   "name": "vanilla_12v_lego_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "mic",
+   "seed": 0,
+   "name": "triplane_cnn_12v_mic_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "mic",
+   "seed": 0,
+   "name": "triplane_12v_mic_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "mic",
+   "seed": 0,
+   "name": "vanilla_12v_mic_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "materials",
+   "seed": 0,
+   "name": "triplane_cnn_12v_materials_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "materials",
+   "seed": 0,
+   "name": "triplane_12v_materials_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "materials",
+   "seed": 0,
+   "name": "vanilla_12v_materials_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "ficus",
+   "seed": 0,
+   "name": "triplane_cnn_12v_ficus_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "ficus",
+   "seed": 0,
+   "name": "triplane_12v_ficus_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "ficus",
+   "seed": 0,
+   "name": "vanilla_12v_ficus_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "chair",
+   "seed": 0,
+   "name": "triplane_cnn_12v_chair_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "chair",
+   "seed": 0,
+   "name": "triplane_12v_chair_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "chair",
+   "seed": 0,
+   "name": "vanilla_12v_chair_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  },
+  {
+   "variant": "triplane_cnn",
+   "scene": "hotdog",
+   "seed": 0,
+   "name": "triplane_cnn_12v_hotdog_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_cnn_12v"
+   ]
+  },
+  {
+   "variant": "triplane",
+   "scene": "hotdog",
+   "seed": 0,
+   "name": "triplane_12v_hotdog_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "triplane_12v"
+   ]
+  },
+  {
+   "variant": "vanilla",
+   "scene": "hotdog",
+   "seed": 0,
+   "name": "vanilla_12v_hotdog_0",
+   "args": [
+    "--train_views",
+    "12",
+    "--variant",
+    "vanilla_12v"
+   ]
+  }
+ ]
+}
